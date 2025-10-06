@@ -7,6 +7,53 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NotebookPen, Trash2, Heart, Mic, MicOff } from "lucide-react";
 
+// Type declarations for Web Speech API
+interface ISpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onend: () => void;
+}
+
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: {
+      new(): ISpeechRecognition;
+    };
+    webkitSpeechRecognition: {
+      new(): ISpeechRecognition;
+    };
+  }
+}
+
 const dailyMoodOptions = [
   { id: "amazing", emoji: "😄", label: "Amazing" },
   { id: "happy", emoji: "😊", label: "Happy" },
@@ -24,7 +71,7 @@ export default function Journal() {
   const [dailyMood, setDailyMood] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   // Check for speech recognition support
   useEffect(() => {
@@ -38,7 +85,7 @@ export default function Journal() {
         recognitionRef.current.interimResults = true;
         recognitionRef.current.lang = 'en-US';
         
-        recognitionRef.current.onresult = (event) => {
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
           let finalTranscript = '';
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
@@ -50,7 +97,7 @@ export default function Journal() {
           }
         };
         
-        recognitionRef.current.onerror = (event) => {
+        recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error:', event.error);
           setIsRecording(false);
         };
