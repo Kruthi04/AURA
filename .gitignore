@@ -1,0 +1,25 @@
+cat > .gitignore <<'EOF'
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+# Build output
+dist/
+# Env & local
+.env
+.env.*
+# Vite
+.vite/
+node_modules/.vite/
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# Optional: audio if they’re large (remove if you want them tracked)
+# public/audio/*.mp3
+EOFnode_modules/
